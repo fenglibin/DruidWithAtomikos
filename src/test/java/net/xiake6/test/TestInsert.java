@@ -1,10 +1,3 @@
-/** 
- * Project Name:atomikos  
- * Description: TODO ADD Description. 
- * Company: iFLYBANK FINANCIAL Technology Co., Ltd. 合肥科讯金服科技有限公司
- * date: 2019年1月27日 下午12:46:29
- * @author wayne
- */ 
 package net.xiake6.test;
 import org.junit.Test;
 import org.junit.runner.RunWith;
