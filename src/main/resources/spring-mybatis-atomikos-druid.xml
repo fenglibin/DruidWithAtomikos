@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans  xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns:jee="http://www.springframework.org/schema/jee"
+    xmlns:tx="http://www.springframework.org/schema/tx" 
+    xmlns:context="http://www.springframework.org/schema/context" 
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+    http://www.springframework.org/schema/tx 
+    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd 
+    http://www.springframework.org/schema/jee 
+    http://www.springframework.org/schema/jee/spring-jee-3.0.xsd 
+    http://www.springframework.org/schema/aop 
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    http://www.springframework.org/schema/context 
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd"
+    default-lazy-init="true">   
+
+	<context:annotation-config />
+	
+	<!--  该实现使用Mysql本身的XA数据源
+	<bean id="abstractXADataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init" destroy-method="close" abstract="true">
+        <property name="xaDataSourceClassName" value="com.mysql.cj.jdbc.MysqlXADataSource"/>
+        <property name="poolSize" value="10"/>
+        <property name="minPoolSize" value="10"/>
+        <property name="maxPoolSize" value="100"/>
+        <property name="borrowConnectionTimeout" value="60"/>
+        <property name="reapTimeout" value="20"/>
+        <property name="maxIdleTime" value="60"/>
+        <property name="maintenanceInterval" value="60"/>
+        <property name="testQuery">
+            <value>SELECT 1</value>
+        </property>
+    </bean>
+    <bean id="dataSourceOne" parent="abstractXADataSource">
+        <property name="uniqueResourceName">
+            <value>dataSourceOne</value>
+        </property>
+        <property name="xaProperties">
+            <props>
+                <prop key="URL">${jdbc.url}</prop>
+                <prop key="user">${jdbc.username}</prop>
+                <prop key="password">${jdbc.password}</prop>
+            </props>
+        </property>
+    </bean>
+    <bean id="dataSourceTwo" parent="abstractXADataSource">
+        <property name="uniqueResourceName">
+            <value>dataSourceTwo</value>
+        </property>
+        <property name="xaProperties">
+            <props>
+                <prop key="URL">${jdbc.two.url}</prop>
+                <prop key="user">${jdbc.two.username}</prop>
+                <prop key="password">${jdbc.two.password}</prop>
+            </props>
+        </property>
+    </bean>
+    -->
+	<!-- 使用Druid使为XA数据源 -->
+    <bean id="abstractXADataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init" destroy-method="close" abstract="true">
+        <property name="xaDataSourceClassName" value="com.alibaba.druid.pool.xa.DruidXADataSource"/>
+        <property name="xaProperties">
+            <props>
+            	<prop key="driverClassName">${jdbc.driverClassName}</prop>
+            	<!-- 配置初始化大小、最小、最大 -->
+				<prop key="initialSize">10</prop>
+				<prop key="minIdle">3</prop>
+				<prop key="maxActive">100</prop>
+				<!-- 配置获取连接等待超时的时间 -->
+				<prop key="maxWait">60000</prop>
+				<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+				<prop key="timeBetweenEvictionRunsMillis">60000</prop>
+				<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+				<prop key="minEvictableIdleTimeMillis">300000</prop>
+				<prop key="validationQuery">SELECT 'x'</prop>
+				<prop key="testWhileIdle">true</prop>
+				<prop key="testOnBorrow">false</prop>
+				<prop key="testOnReturn">false</prop>
+				<!-- 配置监控统计拦截的filters -->
+				<prop key="filters">stat</prop>
+            </props>
+        </property>
+    </bean>
+    <!-- 配置数据源一 -->
+    <bean id="dataSourceOne" parent="abstractXADataSource">
+        <property name="uniqueResourceName">
+            <value>dataSourceOne</value>
+        </property>
+        <property name="xaProperties">
+            <props>
+                <prop key="url">${jdbc.url}</prop>
+                <prop key="username">${jdbc.username}</prop>
+                <prop key="password">${jdbc.password}</prop>
+            </props>
+        </property>
+    </bean>
+    <!--配置数据源二-->
+    <bean id="dataSourceTwo" parent="abstractXADataSource">
+        <property name="uniqueResourceName">
+            <value>dataSourceTwo</value>
+        </property>
+        <property name="xaProperties">
+            <props>
+                <prop key="url">${jdbc.two.url}</prop>
+                <prop key="username">${jdbc.two.username}</prop>
+                <prop key="password">${jdbc.two.password}</prop>
+            </props>
+        </property>
+    </bean>
+    
+    <!--mybatis的相关配置-->
+    <bean id="sqlSessionFactoryOne" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSourceOne"/>
+        <property name="mapperLocations" value="classpath*:mapping/ds1/*.xml"/>
+    </bean>
+    
+    <bean id="sqlSessionFactoryTwo" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSourceTwo"/>
+        <property name="mapperLocations" value="classpath*:mapping/ds2/*.xml"/>
+    </bean>
+    
+    <!--配置mybatis映射文件自动扫描-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="net.xiake6.dao.ds1"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryOne"/>
+    </bean>
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="net.xiake6.dao.ds2"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryTwo"/>
+    </bean>
+
+    <!--配置分布式事务-->
+    <bean id="atomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager" init-method="init" destroy-method="close">
+        <property name="forceShutdown" value="false"/>
+    </bean>
+    <bean id="atomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp">
+        <property name="transactionTimeout" value="3000"/>
+    </bean>
+    <!--JTA事务管理器-->
+    <bean id="jtaTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+        <property name="transactionManager">
+            <ref bean="atomikosTransactionManager"/>
+        </property>
+        <property name="userTransaction">
+            <ref bean="atomikosUserTransaction"/>
+        </property>
+        <property name="allowCustomIsolationLevels" value="true"/>
+    </bean>
+   
+    
+    <aop:config proxy-target-class="true">  
+        <aop:advisor pointcut="execution(* *net.xiake6.service..*(..))" advice-ref="txAdvice" />  
+    </aop:config>  
+    <tx:advice id="txAdvice" transaction-manager="jtaTransactionManager">  
+        <tx:attributes>  
+            <tx:method name="insert*"  propagation="REQUIRED" read-only="false" rollback-for="*Exception"/>
+            <tx:method name="add*" propagation="REQUIRED" read-only="false" rollback-for="*Exception" />  
+            <tx:method name="save*"  propagation="REQUIRED"  read-only="false" rollback-for="*Exception" />    
+            <tx:method name="delete*"  propagation="REQUIRED"  read-only="false" rollback-for="*Exception" />  
+            <tx:method name="del*"  propagation="REQUIRED"  read-only="false" rollback-for="*Exception" />  
+            <tx:method name="update*"  propagation="REQUIRED"  read-only="false" rollback-for="*Exception" />
+            <tx:method name="select*"  propagation="REQUIRED"  read-only="true" />
+            <tx:method name="query"  propagation="REQUIRED"  read-only="true" />
+        </tx:attributes>  
+    </tx:advice>
+    
+    <!-- 配置事务管理 -->
+    <tx:annotation-driven transaction-manager="jtaTransactionManager" />
+</beans>
