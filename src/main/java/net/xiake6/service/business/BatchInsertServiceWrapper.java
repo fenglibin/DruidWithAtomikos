@@ -24,19 +24,10 @@ import net.xiake6.service.UserService;
  * Description
  */
 @Service
-public class BatchInsertService {
-	private Logger logger = LoggerFactory.getLogger(BatchInsertService.class);
+public class BatchInsertServiceWrapper {
+	private Logger logger = LoggerFactory.getLogger(BatchInsertServiceWrapper.class);
 	@Autowired
-	private UserService userService;
-	@Autowired
-	private CustInfoService custInfoService;
-	@Transactional(rollbackFor= {Exception.class,RuntimeException.class})
-	public void insert(User user,CustInfo custInfo) {
-		int insertUser =  userService.insert(user);
-		logger.info("insertUser={}",insertUser);
-		int insertCustInfo = custInfoService.insert(custInfo);
-		logger.info("insertCustInfo={}",insertCustInfo);
-	}
+	private BatchInsertService batchInsertService;
 	
 	@HystrixCommand(commandProperties = {
 			// 属性参考文档：https://www.jianshu.com/p/39763a0bd9b8
@@ -110,12 +101,8 @@ public class BatchInsertService {
 			@HystrixProperty(name = "keepAliveTimeMinutes", value = "2")
 		},
 		fallbackMethod = "hystrixFallbackMethod")
-	@Transactional(rollbackFor= {Exception.class,RuntimeException.class})
 	public int insertWithHystrix(User user,CustInfo custInfo) {
-		int insertUser =  userService.insertWithHystrix(user);
-		logger.info("insertUser={}",insertUser);
-		int insertCustInfo = custInfoService.insertWithHystrix(custInfo);
-		logger.info("insertCustInfo={}",insertCustInfo);
+		batchInsertService.insert(user, custInfo);
 		return 1;
 	}
 	public int hystrixFallbackMethod(User user,CustInfo custInfo) {

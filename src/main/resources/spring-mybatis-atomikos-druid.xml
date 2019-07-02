@@ -133,7 +133,7 @@
     </bean>
 
     <!--配置分布式事务-->
-    <bean id="atomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager" init-method="init" destroy-method="close">
+    <bean id="atomikosUserTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager" init-method="init" destroy-method="close">
         <property name="forceShutdown" value="false"/>
     </bean>
     <bean id="atomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp">
@@ -142,7 +142,7 @@
     <!--JTA事务管理器-->
     <bean id="jtaTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
         <property name="transactionManager">
-            <ref bean="atomikosTransactionManager"/>
+            <ref bean="atomikosUserTransactionManager"/>
         </property>
         <property name="userTransaction">
             <ref bean="atomikosUserTransaction"/>

@@ -19,12 +19,21 @@ import net.xiake6.model.ds2.CustInfo;
 public class CustInfoService {
 	@Autowired
 	private CustInfoMapper custInfoMapper;
-
+	
 	public int insert(CustInfo record) {
 		int result = custInfoMapper.insert(record);
 		long now = System.currentTimeMillis();
 		// 模拟一个异常
-		if (now % 2 == 0) {
+		if (now % 2 > -1) {
+			throw new RuntimeException("CustInfoMapper throws test insert exception");
+		}
+		return result;
+	}
+	public int insertWithHystrix(CustInfo record) {
+		int result = custInfoMapper.insert(record);
+		long now = System.currentTimeMillis();
+		// 模拟一个异常
+		if (now % 2 > -1) {
 			throw new RuntimeException("CustInfoMapper throws test insert exception");
 		}
 		return result;

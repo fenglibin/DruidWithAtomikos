@@ -25,4 +25,16 @@ public class UserService {
 		return result;
 	}
 	
+	public int insertWithHystrix(User record) {
+		int result = userMapper.insert(record);
+		/*
+		long now = System.currentTimeMillis();
+		// 模拟一个异常
+		if (now % 2 > -1) {
+			throw new RuntimeException("Insert user throws test insert exception");
+		}
+		*/
+		return result;
+	}
+	
 }

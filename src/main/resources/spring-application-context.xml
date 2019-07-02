@@ -17,20 +17,21 @@
     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd">
     
+    <!-- 启用aop,使用@AspectJ风格的切面声明 -->
+	<aop:aspectj-autoproxy expose-proxy="true"></aop:aspectj-autoproxy>
+	<!-- 开启注解配置,使Spring关注Annotation -->
+	<context:annotation-config />
+	<!-- 开启异步任务（同时开启定时器注解扫描） -->
+	<task:annotation-driven />
+	<!-- 使用Annotation自动注册Bean -->
+	<context:component-scan base-package="net.xiake6"><!-- base-package 如果多个，用“,”分隔 --> 
+	</context:component-scan>
+	
      <!-- 1. 数据源配置 -->
     <context:property-placeholder location="classpath*:*.properties" file-encoding="utf8" />
 	<bean id="utf8" class="java.lang.String">
 		<constructor-arg value="utf-8"></constructor-arg>
 	</bean>
-    <!-- 开启异步任务（同时开启定时器注解扫描） -->
-    <task:annotation-driven />
-    <!-- 使用@AspectJ风格的切面声明 -->
-    <!-- <aop:aspectj-autoproxy/> -->
-    <!-- 使用Annotation自动注册Bean -->
-    <!-- 在主容器中不扫描@Controller注解，在SpringMvc中只扫描@Controller注解 -->
-    <context:component-scan base-package="net.xiake6"><!-- base-package 如果多个，用“,”分隔 --> 
-        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
-    </context:component-scan>  
     <!-- 引入Mybatis配置 -->
     <!-- <import resource="spring-mybatis-atomikos-druid.xml"/> -->
     <import resource="spring-mybatis-atomikos-druid.xml"/>
