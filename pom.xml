@@ -11,7 +11,7 @@
 		<!-- 注mysql的版本和druid的版本一定要搭配，否则会有问题，目前这两个版本是搭配好的 -->
 		<mysql.version>8.0.11</mysql.version>
 		<druid.version>1.1.17</druid.version>
-		<spring.version>5.1.8.RELEASE</spring.version>
+		<spring.version>6.0.0</spring.version>
 		<hibernate.version>5.1.0.Final</hibernate.version>
 		<jackson.version>2.7.8</jackson.version>
 		<commons-lang3>3.9</commons-lang3>
